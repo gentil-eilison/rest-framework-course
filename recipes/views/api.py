@@ -6,15 +6,20 @@ from rest_framework.response import Response
 from tag.models import Tag
 
 
-@api_view()
+@api_view(http_method_names=['GET', 'POST'])
 def recipes_api_list(request):
-    recipes = Recipe.objects.get_published()[:10]
-    serializer = RecipeSerializer(
-        instance=recipes,
-        many=True,
-        context={"context": request}
-    )
-    return Response(serializer.data)
+    if request.method == 'GET':
+        recipes = Recipe.objects.get_published()[:10]
+        serializer = RecipeSerializer(
+            instance=recipes,
+            many=True,
+            context={"context": request}
+        )
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = RecipeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
 
 @api_view()
